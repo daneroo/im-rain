@@ -7,6 +7,8 @@ Trying to bring up a discovesrable peer network to pass around presence, state, 
 *   [hook.io](https://github.com/hookio/hook.io)
 *   [haibu](https://github.com/nodejitsu/haibu)
 *   [other vagrant project for haibu vm](https://github.com/Filirom1/haibu-vagrant)
+*   [replicate](https://github.com/mikeal/replicate.git)
+*   [follow](https://github.com/iriscouch/follow.git)
 
 ## sodn (by isaacs)
 

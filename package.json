@@ -12,10 +12,9 @@
     "node": ">= v0.4.7"
   },
   "dependencies": {
-      "hook.io": "",
-      "hook.io-logger": "",
-      "hook.io-repl": "",
-      "hook.io-helloworld":""
+      "underscore": "",
+      "underscore.string": "",
+      "cradle": ""
   },
   "devDependencies": {
   }
