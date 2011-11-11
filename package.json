@@ -14,7 +14,7 @@
   "dependencies": {
       "underscore": "",
       "underscore.string": "",
-      "cradle": "",
+      "nano": "",
       "follow":""
   },
   "devDependencies": {
