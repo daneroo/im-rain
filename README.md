@@ -18,6 +18,8 @@ install the modules locally:
     NANO_ENV=testing node master.js
 
 ### couchapp
+Note: once installed with pip (`sudo pip install couchapp`), 
+the files live here:`/Library/Python/2.6/site-packages/couchapp` on my mac
 
     couchapp generate rain
     cd rain
