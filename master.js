@@ -15,6 +15,11 @@ function Monitor(dbname){
 Monitor.prototype = {
   ping: function (){
     var self=this;
+    var delay=Math.floor(Math.random()*10000);
+    setTimeout(function(){self.pingNodelay()},delay);
+  },
+  pingNodelay: function (){
+    var self=this;
     var hostkey='heartbeat:'+os.hostname()+':'+self.dbname;
     self.db.get(hostkey,function(e,doc,h){
       if (e){
@@ -32,7 +37,7 @@ Monitor.prototype = {
               console.log('create:'+self.dbname+':'+self.createAttempts);
               // create database and retry
               return conn.db.create(self.dbname, function () {
-                self.ping();
+                self.pingNodelay();
               });
             }
           } else {
@@ -48,7 +53,7 @@ Monitor.prototype = {
           if (error) {
             console.log('error',error)
           } else {
-            console.log('update pingd:'+self.dbname+':',body.id||'no-id',body.rev||'no-rev');
+            console.log('\nupdate pingd:'+self.dbname+':',body.id||'no-id',body.rev||'no-rev');
           }
         });
       }      
@@ -60,6 +65,14 @@ Monitor.prototype = {
     var self=this;
     self.ping();
     setInterval(function(){self.ping()},10000);
+    setInterval(function(){
+      conn.db.compact(self.dbname,'',function () {
+        self.db.info(function(e,r,c){
+          console.log('post-compact-info',r);
+        });
+      });
+    },25000);
+    
   }
 };
 
