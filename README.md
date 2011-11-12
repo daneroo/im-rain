@@ -10,6 +10,24 @@ Trying to bring up a discovesrable peer network to pass around presence, state, 
 *   [replicate](https://github.com/mikeal/replicate.git)
 *   [follow](https://github.com/iriscouch/follow.git)
 
+## HOWTO
+install the modules locally:
+
+    npm install 
+    node master.js
+    NANO_ENV=testing node master.js
+
+### couchapp
+
+    couchapp generate rain
+    cd rain
+    #couchapp push . http://localhost:5984/rain-0
+    couchapp push . http://daniel:password@localhost:5984/rain-0
+    couchapp autopush . http://daniel:password@localhost:5984/rain-0
+
+    couchapp generate view watched-nodes
+    
+    
 ## sodn (by isaacs)
 
 ## Hook.io
@@ -26,9 +44,3 @@ Haibu which is an important infrastructure piece for nodejitsu, sits on hook.io.
 I used this [other vagrant project for haibu vm](https://github.com/Filirom1/haibu-vagrant)
 as a start for my [vagrant-nodeapps](https://github.com/daneroo/vagrant-nodeapps) server setup, but I will pass on haibu for now.
 
-## HOWTO
-install the modules locally:
-
-    npm install 
-    node master.js
-    NANO_ENV=testing node master.js
