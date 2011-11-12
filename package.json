@@ -1,22 +1,23 @@
 {
-  "author": "Daniel Lauzon <daniel.lauzon@gmail.com>",
-  "name": "im-rain",
-  "version": "0.0.1",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:daneroo/im-rain.git"
-  },
-  "contributors": [
-  ],
-  "engines": {
-    "node": ">= v0.4.7"
-  },
-  "dependencies": {
-      "underscore": "",
-      "underscore.string": "",
-      "nano": "",
-      "follow":""
-  },
-  "devDependencies": {
-  }
+    "author": "Daniel Lauzon <daniel.lauzon@gmail.com>",
+    "name": "im-rain",
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:daneroo/im-rain.git"
+    },
+    "contributors": [
+    ],
+    "engines": {
+        "node": ">= v0.6.0"
+    },
+    "dependencies": {
+        "underscore": "",
+        "underscore.string": "",
+        "nano": "",
+        "async": "",
+        "follow": ""
+    },
+    "devDependencies": {
+    }
 }

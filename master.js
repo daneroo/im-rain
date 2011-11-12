@@ -2,6 +2,7 @@ var _  = require('underscore');
 _.mixin(require('underscore.string'));
 var os = require('os');
 var nano = require('nano');
+var async = require('async');
 var follow = require('follow');
 
 var authdburl = "http://daniel:pokpok@127.0.0.1:5984";
@@ -61,21 +62,37 @@ Monitor.prototype = {
     return;
     
   },
+  compact: function(){
+    var self=this;
+    conn.db.compact(this.dbname,'',function () {
+      self.db.info(function(e,r,c){
+        console.log('post-compact-info',r);
+      });
+    });
+  },
   start: function(){
     var self=this;
     self.ping();
     setInterval(function(){self.ping()},10000);
-    setInterval(function(){
-      conn.db.compact(self.dbname,'',function () {
-        self.db.info(function(e,r,c){
-          console.log('post-compact-info',r);
-        });
-      });
-    },25000);
-    
+    setInterval(function(){self.compact()},25000);
   }
 };
 
+async.series([
+    function(callback){
+        // do some stuff ...
+        callback(null, 'one');
+    },
+    function(callback){
+        // do some more stuff ...
+        callback(null, 'two');
+    },
+],
+// optional callback
+function(err, results){
+    // results is now equal to ['one', 'two']
+    console.log(results);
+});
 /* 
 */
 new Monitor('rain-0').start();
