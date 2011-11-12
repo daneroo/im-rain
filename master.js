@@ -11,90 +11,103 @@ var conn = nano(authdburl);
 function Monitor(dbname){
   this.dbname = dbname;
   this.db = conn.use(dbname);
-  this.createAttempts=3;
+  //this.createAttempts=3;
+  this.doc={};
 }
 Monitor.prototype = {
+  //var delay=Math.floor(Math.random()*10000);
+  hostkey:function(){
+    //return ['heartbeat',os.hostname(),process.pid,this.dbname].join(':');
+    return ['heartbeat',os.hostname(),this.dbname].join(':');
+  },
+  jitter: function(cb){
+    var delay=Math.floor(Math.random()*1000);    
+    setTimeout(function(){cb(null,'jitter:'+delay)},delay);
+  },
+  createdb: function(nanocb){ // nanocb(e,b,h)
+    console.log('-create:'+this.dbname);
+    return conn.db.create(this.dbname, nanocb);
+  },
+  fetch: function(cb){
+    var self=this;
+    this.db.get(this.hostkey(),function(error,doc,headers){
+      if (error){
+        //cb(error);
+      } else {
+        self.doc=doc;
+      }
+      cb(null,'fetched:'+self.doc._rev);
+    });
+  },
+  fillIn: function(cb){
+    _.extend(this.doc,{
+      stamp: new Date(),
+      host: os.hostname(),
+      pid: process.pid
+    });
+    cb(null,'filledIn:'+iso8601(this.doc.stamp));
+  },
+  save: function(cb){ // insert or update
+    var self=this;
+    var saveMethod=(this.doc._rev)?'update':'insert';
+    var onsave = function (error, body, headers) {
+      if (error) {
+        if(error.message === 'no_db_file') {
+          console.log('attempt to create database');
+          self.createdb(function(cr_e,cr_b,cr_h){
+            if (cr_e){
+              cb(cr_e);
+            } else { // attempt to save again
+              self.save(cb)
+            }
+          });
+        } else {
+          cb(error);
+        }
+      } else {
+        cb(null,[saveMethod,body.id||'no-id',body.rev||'no-rev'].join(':'));
+      }
+    };
+    if (this.doc._rev) {
+      this.db.insert(this.doc,onsave);
+    } else {
+      this.db.insert(this.doc,this.hostkey(), onsave);
+    }
+    
+  },
   ping: function (){
     var self=this;
-    var delay=Math.floor(Math.random()*10000);
-    setTimeout(function(){self.pingNodelay()},delay);
-  },
-  pingNodelay: function (){
-    var self=this;
-    var hostkey='heartbeat:'+os.hostname()+':'+self.dbname;
-    self.db.get(hostkey,function(e,doc,h){
-      if (e){
-        console.log('err:get',e);
-        var doc = {
-          stamp: new Date(),
-          host: os.hostname(),
-          pid: process.pid
-        };
-        self.db.insert(doc,hostkey, function (error, body, headers) {
-          if (error) {
-            console.log('error',error)
-            if(error.message === 'no_db_file' && self.createAttempts>0) {
-              self.createAttempts--;
-              console.log('create:'+self.dbname+':'+self.createAttempts);
-              // create database and retry
-              return conn.db.create(self.dbname, function () {
-                self.pingNodelay();
-              });
-            }
-          } else {
-            console.log('insert pingd:'+self.dbname+':'+body);
-          }
-        });  
+    async.series([
+      this.jitter.bind(this),
+      this.fetch.bind(this),
+      this.fillIn.bind(this),
+      this.save.bind(this)
+    ],
+    function(error,results){
+      if (error){
+        console.log('ping:error',error);
       } else {
-        //console.log('got',doc);
-        doc.stamp=new Date();
-        doc.host= os.hostname();
-        doc.pid= process.pid;        
-        self.db.insert(doc,hostkey, function (error, body, headers) {
-          if (error) {
-            console.log('error',error)
-          } else {
-            console.log('\nupdate pingd:'+self.dbname+':',body.id||'no-id',body.rev||'no-rev');
-          }
-        });
-      }      
+        //console.log(iso8601(new Date())+' '+self.dbname+':ping:results',results);
+        console.log(iso8601(new Date())+' '+self.dbname+':ping:results',results[3]);
+      }
     });
-    return;
-    
   },
   compact: function(){
     var self=this;
     conn.db.compact(this.dbname,'',function () {
       self.db.info(function(e,r,c){
-        console.log('post-compact-info',r);
+        console.log('post-compact-info',r.compact_running,r.disk_size,r.data_size);
       });
     });
   },
   start: function(){
     var self=this;
     self.ping();
-    setInterval(function(){self.ping()},10000);
-    setInterval(function(){self.compact()},25000);
+    setInterval(this.ping.bind(this), 3000);
+    setInterval(this.compact.bind(this), 30000);
   }
 };
 
-async.series([
-    function(callback){
-        // do some stuff ...
-        callback(null, 'one');
-    },
-    function(callback){
-        // do some more stuff ...
-        callback(null, 'two');
-    },
-],
-// optional callback
-function(err, results){
-    // results is now equal to ['one', 'two']
-    console.log(results);
-});
-/* 
-*/
 new Monitor('rain-0').start();
 new Monitor('rain-1').start();
 
@@ -113,18 +126,36 @@ function track(dbname){
 
 track('rain-0');
 track('rain-1');
-var continuous=true;
-conn.db.replicate('rain-0','rain-1',continuous,function(e,r,h){
-  if (e){
-    console.log('repl:err',e);
-  } else {
-    console.log('repl:r,h',r,h);
-  }
-});
-conn.db.replicate('rain-1','rain-0',continuous,function(e,r,h){
-  if (e){
-    console.log('repl:err',e);
-  } else {
-    console.log('repl:r,h',r,h);
-  }
-});
+
+
+var replicate=true;
+if (replicate){
+  var continuous=true;
+  conn.db.replicate('rain-0','rain-1',continuous,function(e,r,h){
+    if (e){
+      console.log('repl:err',e);
+    } else {
+      console.log('repl:r,h',r,h);
+    }
+  });
+  conn.db.replicate('rain-1','rain-0',continuous,function(e,r,h){
+    if (e){
+      console.log('repl:err',e);
+    } else {
+      console.log('repl:r,h',r,h);
+    }
+  });
+}
+
+function stamplog(msg){
+    console.log(iso8601(new Date())+' '+msg);
+}
+function iso8601(d){
+    function pad(n){return n<10 ? '0'+n : n}
+    return d.getUTCFullYear()+'-'
+    + pad(d.getUTCMonth()+1)+'-'
+    + pad(d.getUTCDate())+'T'
+    + pad(d.getUTCHours())+':'
+    + pad(d.getUTCMinutes())+':'
+    + pad(d.getUTCSeconds())+'Z';
+}

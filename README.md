@@ -30,4 +30,5 @@ as a start for my [vagrant-nodeapps](https://github.com/daneroo/vagrant-nodeapps
 install the modules locally:
 
     npm install 
-    
+    node master.js
+    NANO_ENV=testing node master.js
