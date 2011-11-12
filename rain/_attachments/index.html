@@ -61,6 +61,22 @@
         <p><em>Protip:</em> If you setup continuous replication between this database and a remote one, this list will reflect remote changes in near real-time.</p>
         <p>This would be a good place to add pagination.</p>
   </script>
+  <script id="watched-nodes" type="text/x-mustache" charset="utf-8">
+        <h3>Watched Nodes</h3>
+        <ul id="nodes">
+          {{#nodes}}
+            <li>
+              <p>
+                <span>{{_id}}</span>
+                <span>{{host}}</span>
+                <span>{{pid}}</span>
+                <span>{{stamp}}</span>
+              </p>
+              <div style="clear:left;"></div>
+            </li>
+          {{/nodes}}
+        </ul>
+  </script>
   <script src="script/app.js"></script>
 
 </html>

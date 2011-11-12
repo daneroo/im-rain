@@ -34,13 +34,28 @@ $(function() {
             }
         });
     };
-    drawItems();
+    //drawItems();
+    function drawNodes() {
+        db.view(design + "/watched-nodes", {
+            descending : "true",
+            limit : 50,
+            update_seq : true,
+            success : function(data) {
+                setupChanges(data.update_seq);
+                var them = $.mustache($("#watched-nodes").html(), {
+                    nodes : data.rows.map(function(r) {return r.value;})
+                });
+                $("#content").html(them);
+            }
+        });
+    };
+    drawNodes();
     var changesRunning = false;
     function setupChanges(since) {
         if (!changesRunning) {
             var changeHandler = db.changes(since);
             changesRunning = true;
-            changeHandler.onChange(drawItems);
+            changeHandler.onChange(drawNodes);
         }
     }
     $.couchProfile.templates.profileReady = $("#new-message").html();
