@@ -5,7 +5,10 @@ var nano = require('nano');
 var async = require('async');
 var follow = require('follow');
 
-var authdburl = "http://daniel:pokpok@127.0.0.1:5984";
+//var authdburl = "http://daniel:pokpok@127.0.0.1:5984";
+//var authdburl = "http://daniel:pokpok@dirac.imetrical.com:5984";
+var authdburl = "http://daniel:pokpok@darwin.imetrical.com:5984";
+
 var conn = nano(authdburl);
 
 function Monitor(dbname){
@@ -24,19 +27,36 @@ Monitor.prototype = {
     var delay=Math.floor(Math.random()*1000);    
     setTimeout(function(){cb(null,'jitter:'+delay)},delay);
   },
-  createdb: function(nanocb){ // nanocb(e,b,h)
-    console.log('-create:'+this.dbname);
-    return conn.db.create(this.dbname, nanocb);
+  
+  // this will create the db and retry the call.
+  createAndRetry: function(boundRetry,cb){
+      console.log('-create:'+this.dbname);    
+      conn.db.create(this.dbname,function(error,r,h){
+        if (error){
+          cb(error);
+        } else { // attempt to save again
+          boundRetry(cb);
+        }
+      });
+      return;
+    
   },
   fetch: function(cb){
     var self=this;
     this.db.get(this.hostkey(),function(error,doc,headers){
       if (error){
-        //cb(error);
+        if(error.message === 'no_db_file') {
+          self.createAndRetry(self.fetch.bind(self),cb);
+          return;
+        } else {
+          // don"t cb(error) because we will insert instead of update
+          // cb(error);
+          self.doc={};
+        }
       } else {
         self.doc=doc;
       }
-      cb(null,'fetched:'+self.doc._rev);
+      cb(null,'fetched:'+self.doc._rev||'no-rev');
     });
   },
   fillIn: function(cb){
@@ -50,17 +70,11 @@ Monitor.prototype = {
   save: function(cb){ // insert or update
     var self=this;
     var saveMethod=(this.doc._rev)?'update':'insert';
+    //console.log('saveMethod',saveMethod);
     var onsave = function (error, body, headers) {
       if (error) {
         if(error.message === 'no_db_file') {
-          console.log('attempt to create database');
-          self.createdb(function(cr_e,cr_b,cr_h){
-            if (cr_e){
-              cb(cr_e);
-            } else { // attempt to save again
-              self.save(cb)
-            }
-          });
+          self.createAndRetry(self.save.bind(self),cb);
         } else {
           cb(error);
         }
@@ -68,7 +82,7 @@ Monitor.prototype = {
         cb(null,[saveMethod,body.id||'no-id',body.rev||'no-rev'].join(':'));
       }
     };
-    if (this.doc._rev) {
+    if (saveMethod==='update') {
       this.db.insert(this.doc,onsave);
     } else {
       this.db.insert(this.doc,this.hostkey(), onsave);
@@ -96,7 +110,8 @@ Monitor.prototype = {
     var self=this;
     conn.db.compact(this.dbname,'',function () {
       self.db.info(function(e,r,c){
-        console.log('post-compact-info',r.compact_running,r.disk_size,r.data_size);
+        //console.log('post-compact-info',r);
+        console.log('post-compact-info',r.compact_running,r.disk_size,r.data_size||'unknownn data_size');
       });
     });
   },
@@ -113,7 +128,7 @@ new Monitor('rain-1').start();
 
 
 function track(dbname){
-  follow({db:"http://daniel:pokpok@127.0.0.1:5984/"+dbname, include_docs:true}, function(error, change) {
+  follow({db:authdburl+'/'+dbname, include_docs:true}, function(error, change) {
     if(!error) {
       //console.log(dbname+"::change " + change.seq + " has " + Object.keys(change.doc).length + " fields");
       console.log(dbname+"::change " + change.seq + " id:" + change.doc._id||'no-id');
@@ -124,8 +139,10 @@ function track(dbname){
   });
 }
 
-track('rain-0');
-track('rain-1');
+if (1){
+  track('rain-0');
+  track('rain-1');
+}
 
 
 var replicate=true;
