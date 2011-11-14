@@ -5,15 +5,25 @@ var nano = require('nano');
 var async = require('async');
 var follow = require('follow');
 
-//var authdburl = "http://daniel:pokpok@127.0.0.1:5984";
-//var authdburl = "http://daniel:pokpok@dirac.imetrical.com:5984";
+var creds="daniel:pokpok@"
 var authdburl = "http://daniel:pokpok@darwin.imetrical.com:5984";
+var rains = [];
+var counter=0;
+["dirac.imetrical.com","darwin.imetrical.com"].forEach(function(host,i){
+  _.times(2,function(){
+    rains.push({srv:'http://'+creds+host+':5984',db:'rain-'+counter++});
+  });
+});
+//rains.push({srv:'https://daniel:password@imetrical.iriscouch.com',db:'rain-cloud'});
 
-var conn = nano(authdburl);
+console.log('rains',rains);
 
-function Monitor(dbname){
+
+function Monitor(srv,dbname){
+  this.srv = srv;
   this.dbname = dbname;
-  this.db = conn.use(dbname);
+  this.conn = nano(srv);
+  this.db = this.conn.use(dbname);
   //this.createAttempts=3;
   this.doc={};
 }
@@ -31,7 +41,7 @@ Monitor.prototype = {
   // this will create the db and retry the call.
   createAndRetry: function(boundRetry,cb){
       console.log('-create:'+this.dbname);    
-      conn.db.create(this.dbname,function(error,r,h){
+      this.conn.db.create(this.dbname,function(error,r,h){
         if (error){
           cb(error);
         } else { // attempt to save again
@@ -102,66 +112,81 @@ Monitor.prototype = {
         console.log('ping:error',error);
       } else {
         //console.log(iso8601(new Date())+' '+self.dbname+':ping:results',results);
-        console.log(iso8601(new Date())+' '+self.dbname+':ping:results',results[3]);
+        console.log(iso8601(new Date())+' '+self.dbname+':ping:results',results[results.length-1]);
       }
     });
   },
   compact: function(){
     var self=this;
-    conn.db.compact(this.dbname,'',function () {
+    this.conn.db.compact(this.dbname,'',function () {
       self.db.info(function(e,r,c){
         //console.log('post-compact-info',r);
         console.log('post-compact-info',r.compact_running,r.disk_size,r.data_size||'unknownn data_size');
       });
     });
   },
+  track:function(){
+    var self=this;
+    follow({db:this.srv+'/'+this.dbname, include_docs:true}, function(error, change) {
+      if(!error) {
+        //console.log(dbname+"::change " + change.seq + " has " + Object.keys(change.doc).length + " fields");
+        console.log(self.dbname+"::change " + change.seq + " id:" + change.doc._id||'no-id');
+        //console.log(dbname+'::change',change);
+      } else {
+        console.log('follow::error',self.dbname,error);
+      }
+    });
+  },
   start: function(){
     var self=this;
     self.ping();
-    setInterval(this.ping.bind(this), 3000);
+    setInterval(this.ping.bind(this), 10000);
     setInterval(this.compact.bind(this), 30000);
+    //setTimeout(this.track.bind(this),4000);
+    return this;
   }
 };
 
-new Monitor('rain-0').start();
-new Monitor('rain-1').start();
+rains.forEach(function(r,i,ary){
+  var rain=new Monitor(r.srv,r.db).start();
+  ary[i].rain=rain;
+});
 
-
-function track(dbname){
-  follow({db:authdburl+'/'+dbname, include_docs:true}, function(error, change) {
-    if(!error) {
-      //console.log(dbname+"::change " + change.seq + " has " + Object.keys(change.doc).length + " fields");
-      console.log(dbname+"::change " + change.seq + " id:" + change.doc._id||'no-id');
-      //console.log(dbname+'::change',change);
+function replicateRing(){  
+  var continuous=true;
+  rains.forEach(function(r,i,ary){
+    var ip1=(i+1)%ary.length;
+    var next=ary[ip1];
+    if (r.srv.match(/iriscouch/)){
+      var t = r;
+      r=next;
+      next=t;
+      console.log('repl',r.srv,r.db,'<--',next.srv+'/'+next.db);
+      r.rain.conn.db.replicate(next.srv+'/'+next.db,r.db,continuous,function(e,r,h){
+        if (e){
+          console.log('repl:err',e);
+        } else {
+          //console.log('repl:r,h',r,h);
+          console.log('repl:r.ok',r.ok);
+        }
+      });
     } else {
-      console.log('follow::error',dbname,error);
-    }
+      console.log('repl',r.srv,r.db,'-->',next.srv+'/'+next.db);
+      r.rain.conn.db.replicate(r.db,next.srv+'/'+next.db,continuous,function(e,r,h){
+        if (e){
+          console.log('repl:err',e);
+        } else {
+          //console.log('repl:r,h',r,h);
+          console.log('repl:r.ok',r.ok);
+        }
+      });
+    }    
   });
 }
-
-if (1){
-  track('rain-0');
-  track('rain-1');
-}
-
 
 var replicate=true;
 if (replicate){
-  var continuous=true;
-  conn.db.replicate('rain-0','rain-1',continuous,function(e,r,h){
-    if (e){
-      console.log('repl:err',e);
-    } else {
-      console.log('repl:r,h',r,h);
-    }
-  });
-  conn.db.replicate('rain-1','rain-0',continuous,function(e,r,h){
-    if (e){
-      console.log('repl:err',e);
-    } else {
-      console.log('repl:r,h',r,h);
-    }
-  });
+  setInterval(replicateRing, 10000);
 }
 
 function stamplog(msg){
