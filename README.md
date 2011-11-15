@@ -9,6 +9,8 @@ Trying to bring up a discovesrable peer network to pass around presence, state, 
 *   [other vagrant project for haibu vm](https://github.com/Filirom1/haibu-vagrant)
 *   [replicate](https://github.com/mikeal/replicate.git)
 *   [follow](https://github.com/iriscouch/follow.git)
+*   [springy](https://github.com/dhotson/springy.git)
+*   [arborjs](http://arborjs.org/)
 
 ## HOWTO
 install the modules locally:

@@ -140,7 +140,7 @@ Monitor.prototype = {
   start: function(){
     var self=this;
     self.ping();
-    setInterval(this.ping.bind(this), 10000);
+    setInterval(this.ping.bind(this), 2000);
     setInterval(this.compact.bind(this), 30000);
     //setTimeout(this.track.bind(this),4000);
     return this;
