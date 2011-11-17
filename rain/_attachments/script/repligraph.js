@@ -16,7 +16,7 @@ jQuery(function(){
     howmany = Math.abs(counter-5)+1;
     //console.log('G(n,e):',graph.nodes.length,graph.edges.length,'->',howmany);
     while (graph.nodes.length<howmany){
-      graph.newNode({label: 'rain-'+graph.nextNodeId});
+      graph.newNode({label: 'rain-'+graph.nextNodeId,color:coin()?'blue':'black'});
     }
     while (graph.nodes.length>howmany){
       graph.removeNode(graph.nodes[0]);
