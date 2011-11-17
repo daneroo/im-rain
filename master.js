@@ -6,15 +6,15 @@ var async = require('async');
 var follow = require('follow');
 
 var creds="daniel:pokpok@"
-var authdburl = "http://daniel:pokpok@darwin.imetrical.com:5984";
 var rains = [];
 var counter=0;
 ["dirac.imetrical.com","darwin.imetrical.com"].forEach(function(host,i){
+//["dirac.imetrical.com"].forEach(function(host,i){
   _.times(2,function(){
     rains.push({srv:'http://'+creds+host+':5984',db:'rain-'+counter++});
   });
 });
-//rains.push({srv:'https://daniel:password@imetrical.iriscouch.com',db:'rain-cloud'});
+rains.push({srv:'https://daniel:couchone42@imetrical.iriscouch.com',db:'rain-cloud'});
 
 console.log('rains',rains);
 
@@ -139,9 +139,9 @@ Monitor.prototype = {
   },
   start: function(){
     var self=this;
-    self.ping();
-    setInterval(this.ping.bind(this), 2000);
-    setInterval(this.compact.bind(this), 30000);
+    //self.ping();
+    setInterval(this.ping.bind(this), 5000);
+    setInterval(this.compact.bind(this), 60000);
     //setTimeout(this.track.bind(this),4000);
     return this;
   }
@@ -152,41 +152,68 @@ rains.forEach(function(r,i,ary){
   ary[i].rain=rain;
 });
 
-function replicateRing(){  
+function replicatorRing(){  
   var continuous=true;
   rains.forEach(function(r,i,ary){
     var ip1=(i+1)%ary.length;
     var next=ary[ip1];
+    var replsrv = r.srv;
     if (r.srv.match(/iriscouch/)){
-      var t = r;
-      r=next;
-      next=t;
-      console.log('repl',r.srv,r.db,'<--',next.srv+'/'+next.db);
-      r.rain.conn.db.replicate(next.srv+'/'+next.db,r.db,continuous,function(e,r,h){
-        if (e){
-          console.log('repl:err',e);
-        } else {
-          //console.log('repl:r,h',r,h);
-          console.log('repl:r.ok',r.ok);
+      console.log('iriscouch swap server, use:',next.srv);
+      replsrv = next.srv;
+    }
+    
+    var desiredSource=(replsrv===r.srv)?r.db:r.srv+'/'+r.db;
+    var desiredTarget=(replsrv===next.srv)?next.db:next.srv+'/'+next.db;
+
+    //use nano to replicate (_active_tasks)
+    nano(replsrv).db.replicate(desiredSource,desiredTarget,true,function(e,r,h){
+      if(e){console.log(e)} else {
+        console.log('+repl:',replsrv,desiredSource,'-->',desiredTarget);
+        console.log(r);
+      }
+    });
+
+    return;    // below uses replicator db.
+    var found=false;
+    var repldb = nano(replsrv).use('_replicator');
+    repldb.list({include_docs:true},function(e,docs,h){
+      console.log('+repl:',replsrv,desiredSource,'-->',desiredTarget);
+      if (e) {
+        console.log(e);
+      } else {
+        //console.log(r.srv,JSON.stringify(docs,null,2));
+        docs.rows.forEach(function(entry,j){
+          if (entry.id.match(/^_design/)) return;
+          var doc = entry.doc;
+          if (doc.source===desiredSource && doc.target===desiredTarget) {
+            console.log('repl:Found:',doc);
+            found=true;
+          }
+        });
+        if (!found) {
+          var newrepl={
+            source:desiredSource,
+            target:desiredTarget,
+            //create_target:true
+            continuous:true,
+            user_ctx: {
+              name: "daniel"
+            }
+          };
+          repldb.insert(newrepl,function(ei,ri,hi){
+            if (ei){ console.log(ei);}
+            else console.log('repl:Added:',newrepl);
+          });
         }
-      });
-    } else {
-      console.log('repl',r.srv,r.db,'-->',next.srv+'/'+next.db);
-      r.rain.conn.db.replicate(r.db,next.srv+'/'+next.db,continuous,function(e,r,h){
-        if (e){
-          console.log('repl:err',e);
-        } else {
-          //console.log('repl:r,h',r,h);
-          console.log('repl:r.ok',r.ok);
-        }
-      });
-    }    
+      }
+    })
   });
 }
 
-var replicate=true;
-if (replicate){
-  setInterval(replicateRing, 10000);
+var replicator=true;
+if (replicator){
+  setInterval(replicatorRing, 30000);
 }
 
 function stamplog(msg){
