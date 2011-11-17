@@ -14,7 +14,7 @@ var counter=0;
     rains.push({srv:'http://'+creds+host+':5984',db:'rain-'+counter++});
   });
 });
-rains.push({srv:'https://daniel:couchone42@imetrical.iriscouch.com',db:'rain-cloud'});
+rains.push({srv:'https://daniel:password@imetrical.iriscouch.com',db:'rain-cloud'});
 
 console.log('rains',rains);
 
