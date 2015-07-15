@@ -31,7 +31,13 @@ the files live here:`/Library/Python/2.6/site-packages/couchapp` on my mac
 
     couchapp generate view watched-nodes
     
-    
+
+## Docker and couchdb
+First make a `docker-compse.yml` starting a couch,
+then bring upa node heartbeating to it...
+
+    docker run -d -p 5984:5984 --name couchdb klaemo/couchdb
+
 ## sodn (by isaacs)
 
 ## Hook.io

@@ -1,0 +1,20 @@
+
+# this is the puls, the monitor and the static app.
+app:
+  # image: daneroo/im-rain
+  # image: imetrical/im-rain
+  build: .
+  environment:
+    - HOST
+  links:
+    - couch
+  ports:
+    - 80:80
+
+couch:
+  image: klaemo/couchdb
+  # volumes_from:
+  #   - DBv20150629
+  ports: # not exposed in prod
+    - 5984:5984
+

@@ -5,16 +5,19 @@ var nano = require('nano');
 var async = require('async');
 var follow = require('follow');
 
-var creds="daniel:pokpok@"
+var creds="daniel:pokpok@";
 var rains = [];
 var counter=0;
-["dirac.imetrical.com","darwin.imetrical.com"].forEach(function(host,i){
+
+// var servers = ["dirac.imetrical.com","darwin.imetrical.com"];
+var servers = ["192.168.99.100"];
+servers.forEach(function(host,i){
 //["dirac.imetrical.com"].forEach(function(host,i){
   _.times(2,function(){
     rains.push({srv:'http://'+creds+host+':5984',db:'rain-'+counter++});
   });
 });
-rains.push({srv:'https://daniel:password@imetrical.iriscouch.com',db:'rain-cloud'});
+// rains.push({srv:'https://daniel:couchone42@imetrical.iriscouch.com',db:'rain-cloud'});
 
 console.log('rains',rains);
 
@@ -35,7 +38,11 @@ Monitor.prototype = {
   },
   jitter: function(cb){
     var delay=Math.floor(Math.random()*1000);    
-    setTimeout(function(){cb(null,'jitter:'+delay)},delay);
+    // console.log('aplying jitter %d',delay);
+    setTimeout(function() {
+        // console.log('done jitter %d',delay);
+        cb(null, 'jitter:' + delay);
+    }, delay);
   },
   
   // this will create the db and retry the call.
@@ -53,6 +60,7 @@ Monitor.prototype = {
   },
   fetch: function(cb){
     var self=this;
+    // console.log('fetch %s',this.hostkey());
     this.db.get(this.hostkey(),function(error,doc,headers){
       if (error){
         if(error.message === 'no_db_file') {
@@ -66,6 +74,7 @@ Monitor.prototype = {
       } else {
         self.doc=doc;
       }
+      // console.log('fetched',self.doc);
       cb(null,'fetched:'+self.doc._rev||'no-rev');
     });
   },
@@ -166,15 +175,18 @@ function replicatorRing(){
     var desiredSource=(replsrv===r.srv)?r.db:r.srv+'/'+r.db;
     var desiredTarget=(replsrv===next.srv)?next.db:next.srv+'/'+next.db;
 
+    console.log('repl',desiredSource,desiredTarget);
+
     //use nano to replicate (_active_tasks)
     nano(replsrv).db.replicate(desiredSource,desiredTarget,true,function(e,r,h){
-      if(e){console.log(e)} else {
+      if(e){console.log(e);} else {
         console.log('+repl:',replsrv,desiredSource,'-->',desiredTarget);
         console.log(r);
       }
     });
 
     return;    // below uses replicator db.
+
     var found=false;
     var repldb = nano(replsrv).use('_replicator');
     repldb.list({include_docs:true},function(e,docs,h){
