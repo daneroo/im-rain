@@ -8,7 +8,7 @@ Trying to bring up a discovesrable peer network to pass around presence, state, 
 ## TODO
 
 * Force Graph (static d3) with cantor,dirac,goedel,DigitalOcean, AWS, iriscouch
-    * toggle two topologies, up/don of nodes, color for hosts
+    * toggle two topologies, up/down of nodes, color for hosts (grey fof offline)
 * Clean up code by function
     * Setup Authentication (Fix admin party or not - test: can I GET /_active_tasks
     * Pulse: generate heartbeat
@@ -32,6 +32,10 @@ install the modules locally:
     npm install 
     node master.js
     NANO_ENV=testing node master.js
+
+### D3 Force Graph
+Source [example](http://bl.ocks.org/mbostock/4062045).
+[This article](http://www.coppelia.io/2014/07/an-a-to-z-of-extra-features-for-the-d3-force-layout/) has lots of practical info.
 
 ### couchapp
 Note: once installed with pip (`sudo pip install couchapp`), 
