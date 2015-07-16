@@ -13,8 +13,6 @@ app:
 
 couch:
   image: klaemo/couchdb
-  # volumes_from:
-  #   - DBv20150629
   ports: # not exposed in prod
     - 5984:5984
 

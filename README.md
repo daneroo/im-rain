@@ -2,15 +2,27 @@
 
 Trying to bring up a discovesrable peer network to pass around presence, state, and perhaps simple metrics history.
 
-## references
-*   [sodn](https://github.com/isaacs/sodn)
-*   [hook.io](https://github.com/hookio/hook.io)
-*   [haibu](https://github.com/nodejitsu/haibu)
-*   [other vagrant project for haibu vm](https://github.com/Filirom1/haibu-vagrant)
-*   [replicate](https://github.com/mikeal/replicate.git)
-*   [follow](https://github.com/iriscouch/follow.git)
-*   [springy](https://github.com/dhotson/springy.git)
-*   [arborjs](http://arborjs.org/)
+## Replication has changed
+[This is how to add and remove replication tasks](http://docs.couchdb.org/en/latest/api/server/common.html#replicate), but to get current replication tasks, we must go through [_active_tasks](http://docs.couchdb.org/en/latest/api/server/common.html#active-tasks)
+
+## TODO
+
+* Clean up code by function
+    * Setup Authentication (Fix admiin party or not)
+    * Pulse: generate heartbeat
+    * Monitor: watch the pulses - npm module follow or nano.follow?
+    * Setup replication
+    * Observe replication (and adjust with delta)
+* Update npm deps
+* Rename master.js to index.js, set in package.json
+* Promisify - or not
+* Replace couch app by static app (CORS?)
+
+## Docker and couchdb
+First make a `docker-compse.yml` starting a couch,
+then bring upa node heartbeating to it...
+
+    docker run -d -p 5984:5984 --name couchdb klaemo/couchdb
 
 ## HOWTO
 install the modules locally:
@@ -32,11 +44,16 @@ the files live here:`/Library/Python/2.6/site-packages/couchapp` on my mac
     couchapp generate view watched-nodes
     
 
-## Docker and couchdb
-First make a `docker-compse.yml` starting a couch,
-then bring upa node heartbeating to it...
+## References
+*   [sodn](https://github.com/isaacs/sodn)
+*   [hook.io](https://github.com/hookio/hook.io)
+*   [haibu](https://github.com/nodejitsu/haibu)
+*   [other vagrant project for haibu vm](https://github.com/Filirom1/haibu-vagrant)
+*   [replicate](https://github.com/mikeal/replicate.git)
+*   [follow](https://github.com/iriscouch/follow.git)
+*   [springy](https://github.com/dhotson/springy.git)
+*   [arborjs](http://arborjs.org/)
 
-    docker run -d -p 5984:5984 --name couchdb klaemo/couchdb
 
 ## sodn (by isaacs)
 
@@ -54,7 +71,7 @@ Haibu which is an important infrastructure piece for nodejitsu, sits on hook.io.
 I used this [other vagrant project for haibu vm](https://github.com/Filirom1/haibu-vagrant)
 as a start for my [vagrant-nodeapps](https://github.com/daneroo/vagrant-nodeapps) server setup, but I will pass on haibu for now.
 
-## replicating with `_replicator` db
+## replicating with `_replicate` db
 
     curl -H 'Content-Type: application/json' -X POST http://daniel:password@localhost:5984/_replicate -d ' {"source": "rain-1", "target": "rain-0", "create_target": true, "continuous": true} '
     

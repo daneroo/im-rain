@@ -1,0 +1,23 @@
+{
+  "curly": true,
+  "eqeqeq": true,
+  "immed": true,
+  "latedef": "nofunc", // allow function name hoisting
+  "newcap": true,
+  "noarg": true,
+  "sub": true,
+  "undef": true,
+  "unused": "vars", // dont'check for unused function params. TODO: revisit this later
+  "boss": true,
+  "eqnull": true,
+  "node": true,
+  "globals": {
+    "Promise"    : true, // TODO: until we rename all bluebird refs or ... use a polyfil...
+    "describe"   : false,
+    "it"         : false,
+    "before"     : false,
+    "beforeEach" : false,
+    "after"      : false,
+    "afterEach"  : false
+  }
+}
