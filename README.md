@@ -8,7 +8,7 @@ Trying to bring up a discovesrable peer network to pass around presence, state, 
 ## TODO
 
 * Clean up code by function
-    * Setup Authentication (Fix admiin party or not)
+    * Setup Authentication (Fix admin party or not - test: can I GET /_active_tasks
     * Pulse: generate heartbeat
     * Monitor: watch the pulses - npm module follow or nano.follow?
     * Setup replication
