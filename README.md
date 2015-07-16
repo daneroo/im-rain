@@ -7,6 +7,8 @@ Trying to bring up a discovesrable peer network to pass around presence, state, 
 
 ## TODO
 
+* Force Graph (static d3) with cantor,dirac,goedel,DigitalOcean, AWS, iriscouch
+    * toggle two topologies, up/don of nodes, color for hosts
 * Clean up code by function
     * Setup Authentication (Fix admin party or not - test: can I GET /_active_tasks
     * Pulse: generate heartbeat
