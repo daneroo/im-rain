@@ -12,6 +12,7 @@
   "eqnull": true,
   "node": true,
   "globals": {
+    "d3"         : false,
     "Promise"    : true, // TODO: until we rename all bluebird refs or ... use a polyfil...
     "describe"   : false,
     "it"         : false,

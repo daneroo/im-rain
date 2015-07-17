@@ -4,13 +4,14 @@
 var _  = require('underscore');
 _.mixin(require('underscore.string'));
 var nano = require('nano');
-var Monitor = require('./lib/pulse').Monitor;
+var Pulse = require('./lib/pulse').Pulse;
 
 var creds="daniel:secret@";
 var rains = []; //{srv,db}
 var counter=0;
 
 // var servers = ["dirac.imetrical.com","darwin.imetrical.com"];
+var servers = ['couch']; // docker name
 var servers = ["192.168.99.100"];
 servers.forEach(function(host,i){
 //["dirac.imetrical.com"].forEach(function(host,i){
@@ -23,7 +24,7 @@ servers.forEach(function(host,i){
 console.log('rains',rains);
 
 rains.forEach(function(r,i,ary){
-  var rain=new Monitor(r.srv,r.db).start();
+  var rain=new Pulse(r.srv,r.db).start();
   // rain.track(); // this works
   ary[i].rain=rain;
 });
