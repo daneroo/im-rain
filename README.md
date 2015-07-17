@@ -7,10 +7,8 @@ Trying to bring up a discovesrable peer network to pass around presence, state, 
 
 ## TODO
 
-* Force Graph (static d3) with cantor,dirac,goedel,DigitalOcean, AWS, iriscouch
-    * toggle two topologies, up/down of nodes, color for hosts (grey fof offline)
 * Clean up code by function
-    * Setup Authentication (Fix admin party or not - test: can I GET /_active_tasks
+    * Setup Authentication (Fix admin party or not - test: can I GET /_config/admins
     * Pulse: generate heartbeat
     * Monitor: watch the pulses - npm module follow or nano.follow?
     * Setup replication
@@ -19,12 +17,15 @@ Trying to bring up a discovesrable peer network to pass around presence, state, 
 * Rename master.js to index.js, set in package.json
 * Promisify - or not
 * Replace couch app by static app (CORS?)
+* Force Graph (static d3) with cantor,dirac,goedel,DigitalOcean, AWS, iriscouch
+    * toggle two topologies, up/down of nodes, color for hosts (grey fof offline)
 
 ## Docker and couchdb
 First make a `docker-compse.yml` starting a couch,
-then bring upa node heartbeating to it...
+then bring up a node heartbeating to it...
 
-    docker run -d -p 5984:5984 --name couchdb klaemo/couchdb
+    # HOSTNAME on OSX shells is not export'ed, so not visible to compose, or the app
+    NODE_NAME=`hostname` docker-compose up
 
 ## HOWTO
 install the modules locally:

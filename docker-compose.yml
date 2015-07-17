@@ -5,7 +5,8 @@ app:
   # image: imetrical/im-rain
   build: .
   environment:
-    HOSTNAME:
+    - COUCH_HOST=couch
+    - NODE_NAME
   links:
     - couch
   ports:
@@ -14,4 +15,4 @@ app:
 couch:
   image: klaemo/couchdb
   ports: # not exposed in prod
-    - 5984  #:5984
+    - 5984:5984
