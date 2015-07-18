@@ -38,7 +38,7 @@ auth.setup()
     if (heartbeat) {
       rains.forEach(function(r, i, ary) {
         var rain = new Pulse(r.srv, r.db).start();
-        // rain.track(); // this works
+        rain.track(); // this works
         ary[i].rain = rain;
       });
     }
