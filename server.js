@@ -16,12 +16,16 @@ auth.setup()
     log.info('Authentication Confirmed');
 
     // setup and start the replisction
-    replicate.start();
+    replicate.start()
+      .then(function() {
+        // TODO: move createDBs out of replicate, then replicate and pulse can start together, and independantly
 
-    // start the pulse for local databases
-    pulse.start();
+        // start the pulse for local databases
+        pulse.start();
+      });
+
   })
   .catch(function(error) {
-    log.error('rain error',error);
+    log.error('rain error', error);
     throw new Error('Encountered an error');
   });
