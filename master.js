@@ -34,7 +34,7 @@ auth.setup()
       setInterval(one, 30000);
     }
 
-    var heartbeat = false;
+    var heartbeat = true;
     if (heartbeat) {
       rains.forEach(function(r, i, ary) {
         var rain = new Pulse(r.srv, r.db).start();
@@ -50,8 +50,7 @@ auth.setup()
   });
 
 function one() {
-  // return replicate.createDBs(rains).then
-  return Promise.resolve(rains)
+  return replicate.createDBs(rains)
     .then(function() {
       return db.activeTasks(rains[0]);
     })
