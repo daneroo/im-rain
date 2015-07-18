@@ -1,6 +1,9 @@
 'use strict';
 
 // dependencies - core-public-internal
+var path = require('path');
+var express = require('express');
+
 var log = require('./lib/log');
 var auth = require('./lib/auth');
 var replicate = require('./lib/replicate');
@@ -26,3 +29,30 @@ auth.setup()
     log.error('rain error', error);
     throw new Error('Encountered an error');
   });
+
+// now the web server
+(function startWebServer() {
+  // var nr = require('newrelic');
+  var app = express();
+  var server = require('http').createServer(app);
+  var io = require('socket.io')(server);
+
+  var port = process.env.PORT || 8000;
+  server.listen(port, function() {
+    console.log('Express server listening on port *:' + port);
+  });
+
+  app.use(express.static(path.join(__dirname, 'public')));
+  // app.get('/', function(req, res) {
+  //   res.sendFile(__dirname + '/index.html');
+  // });
+
+  io.on('connection', function(socket) {
+    io.emit('message', {
+      will: 'be received by everyone whan anyone connects'
+    });
+  });
+
+  pulse.setBus(io);
+
+})();

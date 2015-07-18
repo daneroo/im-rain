@@ -14,11 +14,30 @@
 
 </style>
 <body>
+<div id="lastMessage"></div>
+<script src="/socket.io/socket.io.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 
 <script>
-
+  var socket = io.connect();
+  socket.on('message', logMessage);
+  function logMessage(message){
+    console.log(message);
+    if (message.change){
+      var c = message.change;
+      message = {
+        stamp:c.doc.stamp,
+        host:c.doc.host,
+        db:message.dbname,
+        rev:c.doc._rev
+      };
+    }
+    var msgElt = document.getElementById("lastMessage");
+    msgElt.innerHTML = JSON.stringify(message);
+  }
+</script>
+<script>
 var width = 960,
     height = 500;
 
@@ -38,8 +57,8 @@ var tip = d3.tip()
     .attr('class', 'd3-tip')
     .offset([-10, 0])
     .html(function (d) {
-    return  d.name + "</span>";
-});
+      return  d.name + "</span>";
+    });
 svg.call(tip);
 
 
