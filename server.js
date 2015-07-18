@@ -3,14 +3,12 @@
 // dependencies - core-public-internal
 var _ = require('underscore');
 _.mixin(require('underscore.string'));
-var nano = require('nano');
 var Pulse = require('./lib/pulse').Pulse;
 var log = require('./lib/log');
 var config = require('./lib/config');
 var auth = require('./lib/auth');
 var replicate = require('./lib/replicate');
 var db = require('./lib/db');
-
 
 var rains = []; //{srv,db}
 

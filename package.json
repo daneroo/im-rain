@@ -2,9 +2,9 @@
   "author": "Daniel Lauzon <daniel.lauzon@gmail.com>",
   "name": "im-rain",
   "version": "0.0.1",
-  "main": "master.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node master.js"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",

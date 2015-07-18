@@ -14,25 +14,18 @@ Trying to bring up a discovesrable peer network to pass around presence, state, 
     * Setup replication
     * Observe replication (and adjust with delta)
 * Update npm deps
-* Rename master.js to index.js, set in package.json
+* Rename master.js to server.js, set in package.json
 * Promisify - or not
 * Replace couch app by static app (CORS?)
 * Force Graph (static d3) with cantor,dirac,goedel,DigitalOcean, AWS, iriscouch
     * toggle two topologies, up/down of nodes, color for hosts (grey fof offline)
 
-## Docker and couchdb
-First make a `docker-compse.yml` starting a couch,
-then bring up a node heartbeating to it...
+## Usage
 
     # HOSTNAME on OSX shells is not export'ed, so not visible to compose, or the app
-    NODE_NAME=`hostname` docker-compose up
+    docker-compose build
+    NODE_NAME=`hostname` docker-compose up -d
 
-## HOWTO
-install the modules locally:
-
-    npm install 
-    node master.js
-    NANO_ENV=testing node master.js
 
 ### D3 Force Graph
 Source [example](http://bl.ocks.org/mbostock/4062045).
