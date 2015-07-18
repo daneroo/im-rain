@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "async": "",
+    "bluebird": "^2.9.34",
     "follow": "",
     "nano": "^6.1.4",
     "underscore": "",
