@@ -28,9 +28,9 @@ Trying to bring up a discovesrable peer network to pass around presence, state, 
 
 
 ### D3 Force Graph
-Source [example](http://bl.ocks.org/mbostock/4062045). 
-[Animating Changes in Force Diagram](http://bl.ocks.org/ericcoopey/6c602d7cb14b25c179a4)
-[This article](http://www.coppelia.io/2014/07/an-a-to-z-of-extra-features-for-the-d3-force-layout/) has lots of practical info.
+- Source [example](http://bl.ocks.org/mbostock/4062045). 
+- [Animating Changes in Force Diagram](http://bl.ocks.org/ericcoopey/6c602d7cb14b25c179a4)
+- [This article](http://www.coppelia.io/2014/07/an-a-to-z-of-extra-features-for-the-d3-force-layout/) has lots of practical info.
 
 ### couchapp
 Note: once installed with pip (`sudo pip install couchapp`), 
