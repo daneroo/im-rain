@@ -1,10 +1,11 @@
 'use strict';
 
+/* global io, document*/
 var socket = io.connect();
 socket.on('message', logMessage);
 
 function logMessage(message) {
-  console.log(message);
+  console.log(JSON.stringify(message));
   if (message.change) {
     var c = message.change;
     message = {
@@ -14,6 +15,6 @@ function logMessage(message) {
       rev: c.doc._rev
     };
   }
-  var msgElt = document.getElementById("lastMessage");
+  var msgElt = document.getElementById('lastMessage');
   msgElt.innerHTML = JSON.stringify(message);
 }

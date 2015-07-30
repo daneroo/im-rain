@@ -8,6 +8,7 @@ var log = require('./lib/log');
 var auth = require('./lib/auth');
 var replicate = require('./lib/replicate');
 var rains = require('./lib/rains');
+var bus = require('./lib/bus');
 var pulse = require('./lib/pulse');
 
 rains.setup();
@@ -37,6 +38,9 @@ auth.setup()
   var server = require('http').createServer(app);
   var io = require('socket.io')(server);
 
+  // inject the bus (io)
+  bus.setBus(io);
+
   var port = process.env.PORT || 8000;
   server.listen(port, function() {
     console.log('Express server listening on port *:' + port);
@@ -52,7 +56,5 @@ auth.setup()
       will: 'be received by everyone whan anyone connects'
     });
   });
-
-  pulse.setBus(io);
 
 })();
